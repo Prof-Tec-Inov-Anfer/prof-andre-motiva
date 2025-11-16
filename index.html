@@ -4,12 +4,81 @@
     <title>Prof. André Motiva</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px; font-family: Arial; margin: 0; }
+        h1 { font-size: 2em; }
+        .frase { font-size: 28px; font-style: italic; margin: 30px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 600px; margin: auto; }
+        .turma { font-size: 18px; margin: 20px 0; }
+        a { color: #fff; text-decoration: underline; font-size: 18px; }
+        .erro { font-size: 20px; color: #ffcc00; }
+    </style>
 </head>
-<body style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px; font-family: Arial;">
-    <h1>🚀 Bem-vindo ao Espaço Motivação!</h1>
-    <p>Escaneie seu QR code pra ver sua frase personalizada e ganhar um boost nos estudos. <br><strong>– Prof. André Fernando</strong></p>
-    <p><em>E.E. Francisco Barreto Leme | Língua Portuguesa</em></p>
+<body>
+    <h1 id="titulo">🚀 Bem-vindo ao Espaço Motivação!</h1>
+    <p id="descricao">Escaneie seu QR code pra ver sua frase personalizada e ganhar um boost nos estudos. <br><strong>– Prof. André Fernando</strong></p>
+    <p id="escola"><em>E.E. Francisco Barreto Leme | Língua Portuguesa</em></p>
     <hr style="border: 1px solid white; width: 50%;">
-    <p><small>Exemplo: Acesse /7482 pra ver a frase do aluno com código 7482.</small></p>
+    <p id="exemplo"><small>Exemplo: Acesse /7482 pra ver a frase do aluno com código 7482.</small></p>
+
+    <script>
+        // Todas as 38 frases embutidas (de A e B)
+        const frases = {
+            '7482': { nome: 'BRUNO RODRIGUES SILVA', frase: 'A leitura amplia horizontes de conhecimento.', turma: '1ª Série A' },
+            '5239': { nome: 'CRISTIAN DOS SANTOS CORREA', frase: 'Seu esforço genuíno faz toda a diferença.', turma: '1ª Série A' },
+            '8156': { nome: 'DAVI OLIVEIRA MEIRELES', frase: 'Você tem um potencial incrível para crescer.', turma: '1ª Série A' },
+            '3947': { nome: 'FABIO LEONARDO FERNANDES VELIDO', frase: 'Cada desafio superado te torna mais forte.', turma: '1ª Série A' },
+            '6821': { nome: 'IAN PEREIRA TAVARES', frase: 'Sua dedicação aos estudos é admirável.', turma: '1ª Série A' },
+            '2574': { nome: 'JULIA ROBERTA DA SILVA', frase: 'Continue acreditando no seu potencial único.', turma: '1ª Série A' },
+            '9163': { nome: 'LAIS DA SILVA CONCEICAO', frase: 'Você está construindo um futuro brilhante.', turma: '1ª Série A' },
+            '4738': { nome: 'NICOLY DO NASCIMENTO RODRIGUES', frase: 'Sua persistência é a chave do sucesso.', turma: '1ª Série A' },
+            '5892': { nome: 'PAOLA ROSARIA DE LIMA DOS SANTOS', frase: 'Cada página lida te aproxima dos objetivos.', turma: '1ª Série A' },
+            '7345': { nome: 'PAULA EDUARDA FAVORETO FERREIRA', frase: 'Você é capaz de alcançar grandes conquistas.', turma: '1ª Série A' },
+            '2916': { nome: 'STHEFANY CAMILLI NASCIMENTO GOMES SILVA', frase: 'Seu comprometimento faz a diferença sempre.', turma: '1ª Série A' },
+            '8427': { nome: 'VICTOR GABRIEL DA SILVA CARQUIOLO', frase: 'Continue firme na busca pelo conhecimento.', turma: '1ª Série A' },
+            '6153': { nome: 'MARIA LUISA DE JESUS THIMOTEO', frase: 'Você está evoluindo a cada novo desafio.', turma: '1ª Série A' },
+            '3784': { nome: 'BIANCA GOMES GONCALVES', frase: 'Sua curiosidade é uma grande aliada sempre.', turma: '1ª Série A' },
+            '9521': { nome: 'MURILO DUARTE ALVES CARO DE GODOY', frase: 'Você demonstra maturidade em seus estudos.', turma: '1ª Série A' },
+            '4269': { nome: 'NIKOLY SANCHES CANARI', frase: 'Sua evolução ao longo do tempo impressiona.', turma: '1ª Série A' },
+            '7658': { nome: 'GABRIEL HENRIQUE DE MELO ROCHA', frase: 'Continue investindo no seu desenvolvimento pessoal.', turma: '1ª Série A' },
+            '5134': { nome: 'KAUA JOSE ALVES GOMES', frase: 'Você tem um olhar crítico admirável.', turma: '1ª Série A' },
+            '2847': { nome: 'NICOLY EMANUELLE FLORIANO GODOI', frase: 'Sua determinação é inspiradora para todos.', turma: '1ª Série A' },
+            '6943': { nome: 'KARLOS ALEXANDRE LEAO DE SOUSA', frase: 'Você já superou tantos desafios importantes.', turma: '1ª Série B' },
+            '8217': { nome: 'BRUNO ARCELINA RIBEIRO', frase: 'Sua resiliência é uma qualidade excepcional.', turma: '1ª Série B' },
+            '3562': { nome: 'CESAR HERMINIO ROMANO JUNIOR', frase: 'Continue enfrentando obstáculos com coragem sempre.', turma: '1ª Série B' },
+            '9185': { nome: 'SOPHIA IOTTI NAVARRO', frase: 'Cada dificuldade vencida te prepara melhor.', turma: '1ª Série B' },
+            '4728': { nome: 'EMILY NUNES DE QUEIROZ', frase: 'Você é mais forte do que imagina.', turma: '1ª Série B' },
+            '7391': { nome: 'ERIC XAVIER DE JESUS', frase: 'Seus sonhos são válidos e alcançáveis.', turma: '1ª Série B' },
+            '2456': { nome: 'JULIANE ROBERTA REIS DA SILVA', frase: 'O futuro pertence aos que acreditam.', turma: '1ª Série B' },
+            '8634': { nome: 'ANA LUIZA COCIELLO PRINCEPE', frase: 'Você está construindo bases sólidas do sucesso.', turma: '1ª Série B' },
+            '5179': { nome: 'MARY EDUARDA DA SILVA', frase: 'Suas escolhas de hoje moldam o amanhã.', turma: '1ª Série B' },
+            '3942': { nome: 'VERONICA SOUZA BISPO', frase: 'A leitura abre portas para mundos infinitos.', turma: '1ª Série B' },
+            '6285': { nome: 'VINICIUS ALEXANDRE ROSA CARDOSO', frase: 'Dominar a língua é dominar a expressão.', turma: '1ª Série B' },
+            '9517': { nome: 'LUIZ FELIPE RODRIGUES SANTOS', frase: 'Cada texto interpretado amplia sua visão.', turma: '1ª Série B' },
+            '4863': { nome: 'ANTONY RAFAEL JOAQUIM DOS SANTOS', frase: 'A palavra tem poder e você aprende.', turma: '1ª Série B' },
+            '7249': { nome: 'THAILA DA COSTA SANTOS', frase: 'Ler é viajar sem sair do lugar.', turma: '1ª Série B' },
+            '2735': { nome: 'JULIANA VICTÓRIA GOMES DA SILVA', frase: 'Você faz parte de uma turma incrível.', turma: '1ª Série B' },
+            '8491': { nome: 'DILAN ESTEBAN PEDREROS CARDENA', frase: 'Sua presença enriquece nossa sala de aula.', turma: '1ª Série B' },
+            '5628': { nome: 'LARISSA FERNANDES DE SOUZA', frase: 'Aprender é mais bonito quando compartilhado sempre.', turma: '1ª Série B' },
+            '3154': { nome: 'JENIFFER ROSA FERREIRA DOS SANTOS', frase: 'Você inspira seus colegas com dedicação.', turma: '1ª Série B' },
+            '9376': { nome: 'CAIQUE SOUZA DE OLIVEIRA', frase: 'Nossa turma é melhor porque você está.', turma: '1ª Série B' }
+        };
+
+        // Pega o código do URL (ex: /7482)
+        const path = window.location.pathname;
+        const codigo = path.substring(1); // Remove a /
+
+        if (frases[codigo]) {
+            const aluno = frases[codigo];
+            document.getElementById('titulo').innerHTML = `🌟 Ei, ${aluno.nome}!`;
+            document.getElementById('descricao').innerHTML = `<p style="font-size: 28px; font-style: italic; margin: 30px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">"${aluno.frase}"</p>`;
+            document.getElementById('escola').innerHTML = `<em>– Sua frase exclusiva do Prof. André Fernando</em><p>Continue brilhando na ${aluno.turma}! 📚✨</p><a href="/" style="color: #fff; text-decoration: underline; font-size: 18px;">← Voltar ao Início</a>`;
+            document.getElementById('exemplo').style.display = 'none'; // Esconde o exemplo
+        } else {
+            // Página inicial se não tiver código
+            document.getElementById('descricao').innerHTML = 'Escaneie seu QR code pra ver sua frase personalizada e ganhar um boost nos estudos. <br><strong>– Prof. André Fernando</strong>';
+            document.getElementById('escola').innerHTML = '<em>E.E. Francisco Barreto Leme | Língua Portuguesa</em>';
+            document.getElementById('exemplo').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
