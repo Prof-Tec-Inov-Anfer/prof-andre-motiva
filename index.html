@@ -1,83 +1,406 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <title>Prof. André Motiva</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Gerador de Provas Personalizadas</title>
     <style>
-        body { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px; font-family: Arial; margin: 0; }
-        h1 { font-size: 2em; }
-        .frase { font-size: 28px; font-style: italic; margin: 30px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 600px; margin: auto; }
-        .turma { font-size: 18px; margin: 20px 0; }
-        a { color: #fff; text-decoration: underline; font-size: 18px; }
-        .erro { font-size: 20px; color: #ffcc00; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+       
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+       
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+       
+        .header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+       
+        .header h1 {
+            color: #2a5298;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+       
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+       
+        .turma-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+       
+        .turma-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+       
+        .turma-btn.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+       
+        .turma-btn:not(.active) {
+            background: #e0e0e0;
+            color: #666;
+        }
+       
+        .turma-btn:hover:not(.active) {
+            background: #d0d0d0;
+        }
+       
+        .aluno-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+       
+        .aluno-item:hover {
+            background: #f5f5f5;
+        }
+       
+        .aluno-item.selected {
+            background: #e8f0fe;
+            border-color: #667eea;
+        }
+       
+        .aluno-nome {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+       
+        .aluno-info {
+            font-size: 14px;
+            color: #666;
+        }
+       
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+       
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+       
+        .btn-visualizar {
+            background: #2196F3;
+            color: white;
+        }
+       
+        .btn-visualizar:hover {
+            background: #1976D2;
+        }
+       
+        .btn-imprimir {
+            background: #4CAF50;
+            color: white;
+        }
+       
+        .btn-imprimir:hover {
+            background: #45a049;
+        }
+       
+        .prova-container {
+            display: none;
+        }
+       
+        .prova-container.show {
+            display: block;
+        }
+       
+        .prova-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 8mm;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+       
+        .aluno-selecionado-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+       
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+       
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+           
+            .no-print {
+                display: none !important;
+            }
+           
+            .prova-page {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+           
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1 id="titulo">🚀 Bem-vindo ao Espaço Motivação!</h1>
-    <p id="descricao">Escaneie seu QR code pra ver sua frase personalizada e ganhar um boost nos estudos. <br><strong>– Prof. André Fernando</strong></p>
-    <p id="escola"><em>E.E. Francisco Barreto Leme | Língua Portuguesa</em></p>
-    <hr style="border: 1px solid white; width: 50%;">
-    <p id="exemplo"><small>Exemplo: Acesse /7482 pra ver a frase do aluno com código 7482.</small></p>
-
+    <div class="container">
+        <!-- Header -->
+        <div class="header no-print">
+            <h1>🎓 Sistema Gerador de Provas Personalizadas</h1>
+            <p>E.E. Francisco Barreto Leme - Avaliação Bimestral 4º Bimestre</p>
+        </div>
+        <!-- Seleção de Turma -->
+        <div class="card no-print">
+            <h2>📚 Selecione a Turma:</h2>
+            <div class="turma-selector">
+                <button class="turma-btn active" onclick="selecionarTurma('A')">
+                    1ª Série A (19 alunos)
+                </button>
+                <button class="turma-btn" onclick="selecionarTurma('B')">
+                    1ª Série B (19 alunos)
+                </button>
+            </div>
+        </div>
+        <!-- Lista de Alunos -->
+        <div class="card no-print" id="lista-alunos">
+            <h2>👥 Selecione o Aluno:</h2>
+            <div id="alunos-container" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+                <!-- Alunos serão inseridos aqui -->
+            </div>
+        </div>
+        <!-- Botões de Ação -->
+        <div class="card no-print" id="card-acoes" style="display: none;">
+            <h3>✅ Aluno Selecionado: <span id="nome-selecionado"></span></h3>
+            <div class="aluno-selecionado-info">
+                <div class="info-grid">
+                    <div><strong>Número:</strong> <span id="info-numero"></span></div>
+                    <div><strong>Código:</strong> #<span id="info-codigo"></span></div>
+                    <div><strong>RA:</strong> <span id="info-ra"></span></div>
+                    <div><strong>Turma:</strong> <span id="info-turma"></span></div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-visualizar" onclick="toggleVisualizacao()">
+                    👁️ <span id="btn-texto">Visualizar Prova</span>
+                </button>
+                <button class="btn btn-imprimir" onclick="imprimirProva()">
+                    🖨️ Imprimir Prova (2 folhas)
+                </button>
+            </div>
+        </div>
+        <!-- Visualização da Prova -->
+        <div class="prova-container" id="prova-container">
+            <!-- PÁGINA 1 -->
+            <div class="prova-page">
+                <div style="text-align: center; font-weight: bold; color: red; margin-bottom: 10px;" class="no-print">
+                    📄 FOLHA 1 de 2
+                </div>
+                <div id="conteudo-pagina1">
+                    <!-- Conteúdo será inserido aqui -->
+                </div>
+            </div>
+            <!-- PÁGINA 2 -->
+            <div class="prova-page">
+                <div style="text-align: center; font-weight: bold; color: red; margin-bottom: 10px;" class="no-print">
+                    📄 FOLHA 2 de 2
+                </div>
+                <div id="conteudo-pagina2">
+                    <!-- Conteúdo será inserido aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
-        // Todas as 38 frases embutidas (de A e B)
-        const frases = {
-            '7482': { nome: 'BRUNO RODRIGUES SILVA', frase: 'A leitura amplia horizontes de conhecimento.', turma: '1ª Série A' },
-            '5239': { nome: 'CRISTIAN DOS SANTOS CORREA', frase: 'Seu esforço genuíno faz toda a diferença.', turma: '1ª Série A' },
-            '8156': { nome: 'DAVI OLIVEIRA MEIRELES', frase: 'Você tem um potencial incrível para crescer.', turma: '1ª Série A' },
-            '3947': { nome: 'FABIO LEONARDO FERNANDES VELIDO', frase: 'Cada desafio superado te torna mais forte.', turma: '1ª Série A' },
-            '6821': { nome: 'IAN PEREIRA TAVARES', frase: 'Sua dedicação aos estudos é admirável.', turma: '1ª Série A' },
-            '2574': { nome: 'JULIA ROBERTA DA SILVA', frase: 'Continue acreditando no seu potencial único.', turma: '1ª Série A' },
-            '9163': { nome: 'LAIS DA SILVA CONCEICAO', frase: 'Você está construindo um futuro brilhante.', turma: '1ª Série A' },
-            '4738': { nome: 'NICOLY DO NASCIMENTO RODRIGUES', frase: 'Sua persistência é a chave do sucesso.', turma: '1ª Série A' },
-            '5892': { nome: 'PAOLA ROSARIA DE LIMA DOS SANTOS', frase: 'Cada página lida te aproxima dos objetivos.', turma: '1ª Série A' },
-            '7345': { nome: 'PAULA EDUARDA FAVORETO FERREIRA', frase: 'Você é capaz de alcançar grandes conquistas.', turma: '1ª Série A' },
-            '2916': { nome: 'STHEFANY CAMILLI NASCIMENTO GOMES SILVA', frase: 'Seu comprometimento faz a diferença sempre.', turma: '1ª Série A' },
-            '8427': { nome: 'VICTOR GABRIEL DA SILVA CARQUIOLO', frase: 'Continue firme na busca pelo conhecimento.', turma: '1ª Série A' },
-            '6153': { nome: 'MARIA LUISA DE JESUS THIMOTEO', frase: 'Você está evoluindo a cada novo desafio.', turma: '1ª Série A' },
-            '3784': { nome: 'BIANCA GOMES GONCALVES', frase: 'Sua curiosidade é uma grande aliada sempre.', turma: '1ª Série A' },
-            '9521': { nome: 'MURILO DUARTE ALVES CARO DE GODOY', frase: 'Você demonstra maturidade em seus estudos.', turma: '1ª Série A' },
-            '4269': { nome: 'NIKOLY SANCHES CANARI', frase: 'Sua evolução ao longo do tempo impressiona.', turma: '1ª Série A' },
-            '7658': { nome: 'GABRIEL HENRIQUE DE MELO ROCHA', frase: 'Continue investindo no seu desenvolvimento pessoal.', turma: '1ª Série A' },
-            '5134': { nome: 'KAUA JOSE ALVES GOMES', frase: 'Você tem um olhar crítico admirável.', turma: '1ª Série A' },
-            '2847': { nome: 'NICOLY EMANUELLE FLORIANO GODOI', frase: 'Sua determinação é inspiradora para todos.', turma: '1ª Série A' },
-            '6943': { nome: 'KARLOS ALEXANDRE LEAO DE SOUSA', frase: 'Você já superou tantos desafios importantes.', turma: '1ª Série B' },
-            '8217': { nome: 'BRUNO ARCELINA RIBEIRO', frase: 'Sua resiliência é uma qualidade excepcional.', turma: '1ª Série B' },
-            '3562': { nome: 'CESAR HERMINIO ROMANO JUNIOR', frase: 'Continue enfrentando obstáculos com coragem sempre.', turma: '1ª Série B' },
-            '9185': { nome: 'SOPHIA IOTTI NAVARRO', frase: 'Cada dificuldade vencida te prepara melhor.', turma: '1ª Série B' },
-            '4728': { nome: 'EMILY NUNES DE QUEIROZ', frase: 'Você é mais forte do que imagina.', turma: '1ª Série B' },
-            '7391': { nome: 'ERIC XAVIER DE JESUS', frase: 'Seus sonhos são válidos e alcançáveis.', turma: '1ª Série B' },
-            '2456': { nome: 'JULIANE ROBERTA REIS DA SILVA', frase: 'O futuro pertence aos que acreditam.', turma: '1ª Série B' },
-            '8634': { nome: 'ANA LUIZA COCIELLO PRINCEPE', frase: 'Você está construindo bases sólidas do sucesso.', turma: '1ª Série B' },
-            '5179': { nome: 'MARY EDUARDA DA SILVA', frase: 'Suas escolhas de hoje moldam o amanhã.', turma: '1ª Série B' },
-            '3942': { nome: 'VERONICA SOUZA BISPO', frase: 'A leitura abre portas para mundos infinitos.', turma: '1ª Série B' },
-            '6285': { nome: 'VINICIUS ALEXANDRE ROSA CARDOSO', frase: 'Dominar a língua é dominar a expressão.', turma: '1ª Série B' },
-            '9517': { nome: 'LUIZ FELIPE RODRIGUES SANTOS', frase: 'Cada texto interpretado amplia sua visão.', turma: '1ª Série B' },
-            '4863': { nome: 'ANTONY RAFAEL JOAQUIM DOS SANTOS', frase: 'A palavra tem poder e você aprende.', turma: '1ª Série B' },
-            '7249': { nome: 'THAILA DA COSTA SANTOS', frase: 'Ler é viajar sem sair do lugar.', turma: '1ª Série B' },
-            '2735': { nome: 'JULIANA VICTÓRIA GOMES DA SILVA', frase: 'Você faz parte de uma turma incrível.', turma: '1ª Série B' },
-            '8491': { nome: 'DILAN ESTEBAN PEDREROS CARDENA', frase: 'Sua presença enriquece nossa sala de aula.', turma: '1ª Série B' },
-            '5628': { nome: 'LARISSA FERNANDES DE SOUZA', frase: 'Aprender é mais bonito quando compartilhado sempre.', turma: '1ª Série B' },
-            '3154': { nome: 'JENIFFER ROSA FERREIRA DOS SANTOS', frase: 'Você inspira seus colegas com dedicação.', turma: '1ª Série B' },
-            '9376': { nome: 'CAIQUE SOUZA DE OLIVEIRA', frase: 'Nossa turma é melhor porque você está.', turma: '1ª Série B' }
+        const dadosAlunos = {
+            'A': [
+                { numero: 2, nome: "BRUNO RODRIGUES SILVA", ra: "113433827-2", codigo: "7482", frase: "A leitura amplia horizontes de conhecimento." },
+                { numero: 4, nome: "CRISTIAN DOS SANTOS CORREA", ra: "113044330-9", codigo: "5239", frase: "Seu esforço genuíno faz toda a diferença." },
+                { numero: 5, nome: "DAVI OLIVEIRA MEIRELES", ra: "109806448-3", codigo: "8156", frase: "Você tem um potencial incrível para crescer." },
+                { numero: 6, nome: "FABIO LEONARDO FERNANDES VELIDO", ra: "111332668-2", codigo: "3947", frase: "Cada desafio superado te torna mais forte." },
+                { numero: 7, nome: "IAN PEREIRA TAVARES", ra: "112947865-8", codigo: "6821", frase: "Sua dedicação aos estudos é admirável." },
+                { numero: 9, nome: "JULIA ROBERTA DA SILVA", ra: "110826709-9", codigo: "2574", frase: "Continue acreditando no seu potencial único." },
+                { numero: 12, nome: "LAIS DA SILVA CONCEICAO", ra: "111947801-7", codigo: "9163", frase: "Você está construindo um futuro brilhante." },
+                { numero: 13, nome: "NICOLY DO NASCIMENTO RODRIGUES", ra: "110983316-7", codigo: "4738", frase: "Sua persistência é a chave do sucesso." },
+                { numero: 15, nome: "PAOLA ROSARIA DE LIMA DOS SANTOS", ra: "113044087-4", codigo: "5892", frase: "Cada página lida te aproxima dos objetivos." },
+                { numero: 16, nome: "PAULA EDUARDA FAVORETO FERREIRA", ra: "111432958-7", codigo: "7345", frase: "Você é capaz de alcançar grandes conquistas." },
+                { numero: 18, nome: "STHEFANY CAMILLI NASCIMENTO GOMES SILVA", ra: "110079488-8", codigo: "2916", frase: "Seu comprometimento faz a diferença sempre." },
+                { numero: 19, nome: "VICTOR GABRIEL DA SILVA CARQUIOLO", ra: "113088627-X", codigo: "8427", frase: "Continue firme na busca pelo conhecimento." },
+                { numero: 20, nome: "MARIA LUISA DE JESUS THIMOTEO", ra: "110204967-0", codigo: "6153", frase: "Você está evoluindo a cada novo desafio." },
+                { numero: 21, nome: "BIANCA GOMES GONCALVES", ra: "115399645-5", codigo: "3784", frase: "Sua curiosidade é uma grande aliada sempre." },
+                { numero: 29, nome: "MURILO DUARTE ALVES CARO DE GODOY", ra: "110998500-9", codigo: "9521", frase: "Você demonstra maturidade em seus estudos." },
+                { numero: 34, nome: "NIKOLY SANCHES CANARI", ra: "110792389-X", codigo: "4269", frase: "Sua evolução ao longo do tempo impressiona." },
+                { numero: 35, nome: "GABRIEL HENRIQUE DE MELO ROCHA", ra: "112019663-2", codigo: "7658", frase: "Continue investindo no seu desenvolvimento pessoal." },
+                { numero: 45, nome: "KAUA JOSE ALVES GOMES", ra: "115514756-X", codigo: "5134", frase: "Você tem um olhar crítico admirável." },
+                { numero: 46, nome: "NICOLY EMANUELLE FLORIANO GODOI", ra: "111036662-0", codigo: "2847", frase: "Sua determinação é inspiradora para todos." }
+            ],
+            'B': [
+                { numero: 1, nome: "KARLOS ALEXANDRE LEAO DE SOUSA", ra: "110013387-2", codigo: "6943", frase: "Você já superou tantos desafios importantes." },
+                { numero: 2, nome: "BRUNO ARCELINA RIBEIRO", ra: "123859127-9", codigo: "8217", frase: "Sua resiliência é uma qualidade excepcional." },
+                { numero: 3, nome: "CESAR HERMINIO ROMANO JUNIOR", ra: "110088384-8", codigo: "3562", frase: "Continue enfrentando obstáculos com coragem sempre." },
+                { numero: 6, nome: "SOPHIA IOTTI NAVARRO", ra: "111736611-X", codigo: "9185", frase: "Cada dificuldade vencida te prepara melhor." },
+                { numero: 7, nome: "EMILY NUNES DE QUEIROZ", ra: "112195761-4", codigo: "4728", frase: "Você é mais forte do que imagina." },
+                { numero: 8, nome: "ERIC XAVIER DE JESUS", ra: "109806664-9", codigo: "7391", frase: "Seus sonhos são válidos e alcançáveis." },
+                { numero: 9, nome: "JULIANE ROBERTA REIS DA SILVA", ra: "111947575-2", codigo: "2456", frase: "O futuro pertence aos que acreditam." },
+                { numero: 10, nome: "ANA LUIZA COCIELLO PRINCEPE", ra: "112965005-4", codigo: "8634", frase: "Você está construindo bases sólidas do sucesso." },
+                { numero: 11, nome: "MARY EDUARDA DA SILVA", ra: "112275979-4", codigo: "5179", frase: "Suas escolhas de hoje moldam o amanhã." },
+                { numero: 12, nome: "VERONICA SOUZA BISPO", ra: "110063360-1", codigo: "3942", frase: "A leitura abre portas para mundos infinitos." },
+                { numero: 13, nome: "VINICIUS ALEXANDRE ROSA CARDOSO", ra: "113891091-0", codigo: "6285", frase: "Dominar a língua é dominar a expressão." },
+                { numero: 14, nome: "LUIZ FELIPE RODRIGUES SANTOS", ra: "111942626-1", codigo: "9517", frase: "Cada texto interpretado amplia sua visão." },
+                { numero: 15, nome: "ANTONY RAFAEL JOAQUIM DOS SANTOS", ra: "112186453-3", codigo: "4863", frase: "A palavra tem poder e você aprende." },
+                { numero: 16, nome: "THAILA DA COSTA SANTOS", ra: "112474346-7", codigo: "7249", frase: "Ler é viajar sem sair do lugar." },
+                { numero: 17, nome: "JULIANA VICTÓRIA GOMES DA SILVA", ra: "109908686-3", codigo: "2735", frase: "Você faz parte de uma turma incrível." },
+                { numero: 18, nome: "DILAN ESTEBAN PEDREROS CARDENA", ra: "125763675-3", codigo: "8491", frase: "Sua presença enriquece nossa sala de aula." },
+                { numero: 19, nome: "LARISSA FERNANDES DE SOUZA", ra: "110794234-2", codigo: "5628", frase: "Aprender é mais bonito quando compartilhado sempre." },
+                { numero: 22, nome: "JENIFFER ROSA FERREIRA DOS SANTOS", ra: "113201915-1", codigo: "3154", frase: "Você inspira seus colegas com dedicação." },
+                { numero: 23, nome: "CAIQUE SOUZA DE OLIVEIRA", ra: "120253165-9", codigo: "9376", frase: "Nossa turma é melhor porque você está." }
+            ]
         };
-
-        // Pega o código do URL (ex: /7482)
-        const path = window.location.pathname;
-        const codigo = path.substring(1); // Remove a /
-
-        if (frases[codigo]) {
-            const aluno = frases[codigo];
-            document.getElementById('titulo').innerHTML = `🌟 Ei, ${aluno.nome}!`;
-            document.getElementById('descricao').innerHTML = `<p style="font-size: 28px; font-style: italic; margin: 30px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">"${aluno.frase}"</p>`;
-            document.getElementById('escola').innerHTML = `<em>– Sua frase exclusiva do Prof. André Fernando</em><p>Continue brilhando na ${aluno.turma}! 📚✨</p><a href="/" style="color: #fff; text-decoration: underline; font-size: 18px;">← Voltar ao Início</a>`;
-            document.getElementById('exemplo').style.display = 'none'; // Esconde o exemplo
-        } else {
-            // Página inicial se não tiver código
-            document.getElementById('descricao').innerHTML = 'Escaneie seu QR code pra ver sua frase personalizada e ganhar um boost nos estudos. <br><strong>– Prof. André Fernando</strong>';
-            document.getElementById('escola').innerHTML = '<em>E.E. Francisco Barreto Leme | Língua Portuguesa</em>';
-            document.getElementById('exemplo').style.display = 'block';
+        let turmaSelecionada = 'A';
+        let alunoSelecionado = null;
+        let visualizando = false;
+        function selecionarTurma(turma) {
+            turmaSelecionada = turma;
+            alunoSelecionado = null;
+            visualizando = false;
+           
+            // Atualizar botões
+            document.querySelectorAll('.turma-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+           
+            // Carregar alunos
+            carregarAlunos();
+           
+            // Esconder card de ações
+            document.getElementById('card-acoes').style.display = 'none';
+            document.getElementById('prova-container').classList.remove('show');
         }
-    </script>
-</body>
+        function carregarAlunos() {
+            const container = document.getElementById('alunos-container');
+            container.innerHTML = '';
+           
+            dadosAlunos[turmaSelecionada].forEach(aluno => {
+                const div = document.createElement('div');
+                div.className = 'aluno-item';
+                div.onclick = () => selecionarAluno(aluno);
+                div.innerHTML = `
+                    <div class="aluno-nome">${aluno.nome}</div>
+                    <div class="aluno-info">Nº ${aluno.numero} | RA: ${aluno.ra} | Código: #${aluno.codigo}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        function selecionarAluno(aluno) {
+            alunoSelecionado = aluno;
+            visualizando = false;
+           
+            // Atualizar seleção visual
+            document.querySelectorAll('.aluno-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+           
+            // Mostrar card de ações
+            document.getElementById('card-acoes').style.display = 'block';
+            document.getElementById('nome-selecionado').textContent = aluno.nome;
+            document.getElementById('info-numero').textContent = aluno.numero;
+            document.getElementById('info-codigo').textContent = aluno.codigo;
+            document.getElementById('info-ra').textContent = aluno.ra;
+            document.getElementById('info-turma').textContent = '1ª Série ' + turmaSelecionada;
+           
+            // Esconder visualização
+            document.getElementById('prova-container').classList.remove('show');
+            document.getElementById('btn-texto').textContent = 'Visualizar Prova';
+           
+            // Gerar conteúdo da prova
+            gerarProva();
+        }
+        function toggleVisualizacao() {
+            visualizando = !visualizando;
+            const container = document.getElementById('prova-container');
+           
+            if (visualizando) {
+                container.classList.add('show');
+                document.getElementById('btn-texto').textContent = 'Ocultar Visualização';
+                // Scroll para a prova
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                container.classList.remove('show');
+                document.getElementById('btn-texto').textContent = 'Visualizar Prova';
+            }
+        }
+        function imprimirProva() {
+            if (!visualizando) {
+                document.getElementById('prova-container').classList.add('show');
+            }
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+        function gerarProva() {
+            const aluno = alunoSelecionado;
+           
+            // PÁGINA 1
+            document.getElementById('conteudo-pagina1').innerHTML = `
+                <style>
+                    .prova-content * { margin: 0; padding: 0; box-sizing: border-box; }
+                    .prova-content { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; line-height: 1.3; color: #000; }
+                    .header-section { display: flex; gap: 5px; margin-bottom: 5px; }
+                    .brasao { width: 90px; border: 2.5px solid #000; border-radius: 8px; padding: 2px; }
+                    .brasao img { width: 100%; height: 100%; object-fit: contain; }
+                    .header-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+                    .box { border: 2.5px solid #000; border-radius: 8px; padding: 3px 6px; background: white; display: flex; align-items: center; }
+                    .box-title { justify-content: center; text-align: center
